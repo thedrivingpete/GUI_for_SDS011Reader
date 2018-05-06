@@ -7,7 +7,7 @@ import time
 import pyqtgraph as pg
 from sensordummy import SensorDummy
 
-dummy = True
+dummy = False
 
 class MyWindow(QtWidgets.QMainWindow):
     """Die Klasse des Hauptfensters. Erbt von QMainWindow"""
