@@ -173,7 +173,7 @@ class MyWindow(QtWidgets.QMainWindow):
         header += "\r\n"
 #                 winkel,  P,        signal,        RMS_signal,    T_mess,    U_mess,    U_qcl,    I_av,    I_p_calc,       I_p_oszi  
         header += "Zeit\tPM2.5\tPM10\r\n"
-        header += "s\t#/m^3\t#/m^3" 
+        header += "s\tµg/m^3\tµg/m^3" 
         
         datei = self.ordner + "\\" + fname
         print("Speichere Datei...")
@@ -192,7 +192,7 @@ class MyWindow(QtWidgets.QMainWindow):
             header += self.lineEdit_kommentar.text()
             header += "\r\n"
             header += "Zeit\tPM2.5\tPM10\r\n"
-            header += "s\t#/m^3\t#/m^3" 
+            header += "s\tµg/m^3\tµg/m^3" 
             
             datei = pfad + "\\" + fname
             print("Speichere Datei...")
