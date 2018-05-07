@@ -165,7 +165,7 @@ class MyWindow(QtWidgets.QMainWindow):
     def save_rec(self):
         data = np.array(self.recdata[1:])
 
-        fname = "Feinstaub_" + self.startzeit_rec_str + ".fs"
+        fname = "Feinstaub_" + self.startzeit_rec_str + ".txt"
                 
         header = time.strftime("%a, %d %b %Y %H:%M:%S") + "\r\n"
         header += fname + "\r\n"
@@ -185,13 +185,12 @@ class MyWindow(QtWidgets.QMainWindow):
                 "", options=QtWidgets.QFileDialog.ShowDirsOnly)
         if pfad:
             data = np.array(self.data[1:])    
-            fname = "Feinstaub_" + time.strftime("%Y.%m.%d-%H.%M.%S") + ".fs"
+            fname = "Feinstaub_" + time.strftime("%Y.%m.%d-%H.%M.%S") + ".txt"
                     
             header = time.strftime("%a, %d %b %Y %H:%M:%S") + "\r\n"
             header += fname + "\r\n"
             header += self.lineEdit_kommentar.text()
             header += "\r\n"
-    #                 winkel,  P,        signal,        RMS_signal,    T_mess,    U_mess,    U_qcl,    I_av,    I_p_calc,       I_p_oszi  
             header += "Zeit\tPM2.5\tPM10\r\n"
             header += "s\t#/m^3\t#/m^3" 
             
