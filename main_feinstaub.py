@@ -150,7 +150,7 @@ class MyWindow(QtWidgets.QMainWindow):
             self.kurve10.setData(self.data[:,0], self.data[:,2])
         
         if self.rec:
-            t_rec = time.time()-self.startzeit_rec
+            t_rec = float(int((time.time()-self.startzeit_rec)*1000))/1000
             self.recdata = np.vstack((self.recdata, np.array([t_rec, values[0], values[1]])))
             if len(self.data)%5==0:
                 self.save_rec()
@@ -191,6 +191,7 @@ class MyWindow(QtWidgets.QMainWindow):
             header += fname + "\r\n"
             header += self.lineEdit_kommentar.text()
             header += "\r\n"
+    #                 winkel,  P,        signal,        RMS_signal,    T_mess,    U_mess,    U_qcl,    I_av,    I_p_calc,       I_p_oszi  
             header += "Zeit\tPM2.5\tPM10\r\n"
             header += "s\tµg/m^3\tµg/m^3" 
             
