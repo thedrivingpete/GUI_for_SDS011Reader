@@ -6,6 +6,7 @@ import numpy as np
 import time
 import pyqtgraph as pg
 from sensordummy import SensorDummy
+import io
 
 dummy = False
 
@@ -156,6 +157,11 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.save_rec()
                 
     def textFormat(self, value):
+        """
+        Formattiert den Text des Darstellungslabels für den aktuellen Sensorwert
+        in die gewünschte Form. Verwendet HTML_Quellecode, der automatisch vom
+        Designer generiert wurde, daher evtl. etwas übergenau
+        """
         text =  "<html><head/><body><p><span style=\"font-size:11pt;"
         text += "font-weight:600; color:#aa0000;\">" + str(value)
         text += " µg/m</span><span style=\" font-size:11pt; font-weight:600;"
@@ -163,64 +169,91 @@ class MyWindow(QtWidgets.QMainWindow):
         return text
                 
     def save_rec(self):
-        data = np.array(self.recdata[1:])
+        """
+        Speichert die Daten, welche seit Klick auf den Rec-Button gesammelt
+        wurden, in eine Datei mit automatisch generiertem Dateinamen im 
+        spezifizierten Ordner
+        """
+        data = np.array(self.recdata[1:]) #Die zu speichernden Daten
 
-        fname = "Feinstaub_" + self.startzeit_rec_str + ".txt"
-                
-        header = time.strftime("%a, %d %b %Y %H:%M:%S") + "\r\n"
+        fname = "Feinstaub_" + self.startzeit_rec_str + ".txt" # Der Dateiname
+        # Jetzt den Dateiheader zusammenbasteln
+        header = time.strftime("%a, %d %b %Y %H:%M:%S") + "\r\n" 
         header += fname + "\r\n"
         header += self.lineEdit_kommentar.text()
         header += "\r\n"
-#                 winkel,  P,        signal,        RMS_signal,    T_mess,    U_mess,    U_qcl,    I_av,    I_p_calc,       I_p_oszi  
         header += "Zeit\tPM2.5\tPM10\r\n"
-        header += "s\tµg/m^3\tµg/m^3" 
+        header += "s\tmug/m^3\tmug/m^3"  #mu, weil str.decode() nicht mit 'µ' klar kommt
         
         datei = self.ordner + "\\" + fname
         print("Speichere Datei...")
-        np.savetxt(datei, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '')
+#        np.savetxt(datei, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '')
+        # Achtung, jetzt folgt allerübelste Frickelei - Weiterlesen auf eigene Gefahr...
+        mem_file = io.BytesIO() # Temporärer Dump für die Ausgabe von savetxt
+        np.savetxt(mem_file, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '') # jetzt die Datei in mem_file schreiben
+        new_data_str = mem_file.getvalue().decode().replace('.', ',')# und Punkt durch Komma ersetzen
+        new_data_str = new_data_str.replace(fname.replace('.', ','), fname).replace('mu', 'µ') # und jetzt alles reparieren, was ich vorher kaputt gemacht hab
+        # und jetzt die eigentliche Datei schreiben
+        output_file = open(datei, 'w')
+        output_file.write(new_data_str)
+        output_file.close()
         
     def saveShowData(self):
+        """
+        Speichert die aktuell dargestellten Daten in eine Datei mit automatisch
+        generiertem Dateinamen im spezifizierten Ordner
+        """
+        #Ordnerauswahldialog
         pfad  = QtWidgets.QFileDialog.getExistingDirectory(self,
                 "Ordner zum Speichern setzen...",
                 "", options=QtWidgets.QFileDialog.ShowDirsOnly)
         if pfad:
             data = np.array(self.data[1:])    
-            fname = "Feinstaub_" + time.strftime("%Y.%m.%d-%H.%M.%S") + ".txt"
-                    
+            fname = "Feinstaub_" + time.strftime("%Y.%m.%d-%H.%M.%S") + ".txt" # Der Dateiname
+            # Jetzt den Dateiheader zusammenbasteln
             header = time.strftime("%a, %d %b %Y %H:%M:%S") + "\r\n"
             header += fname + "\r\n"
             header += self.lineEdit_kommentar.text()
             header += "\r\n"
-    #                 winkel,  P,        signal,        RMS_signal,    T_mess,    U_mess,    U_qcl,    I_av,    I_p_calc,       I_p_oszi  
             header += "Zeit\tPM2.5\tPM10\r\n"
-            header += "s\tµg/m^3\tµg/m^3" 
+            header += "s\tmug/m^3\tmug/m^3" #mu, weil str.decode() nicht mit 'µ' klar kommt
             
             datei = pfad + "\\" + fname
             print("Speichere Datei...")
-            np.savetxt(datei, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '')
+#            np.savetxt(datei, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '')
+            # Achtung, jetzt folgt allerübelste Frickelei - Weiterlesen auf eigene Gefahr...
+            mem_file = io.BytesIO() # Temporärer Dump für die Ausgabe von savetxt
+            np.savetxt(mem_file, data, fmt="%s", delimiter='\t', newline='\r\n', header=header, comments = '') # jetzt die Datei in mem_file schreiben
+            new_data_str = mem_file.getvalue().decode().replace('.', ',')# und Punkt durch Komma ersetzen
+            new_data_str = new_data_str.replace(fname.replace('.', ','), fname).replace('mu', 'µ') # und jetzt alles reparieren, was ich vorher kaputt gemacht hab
+            # und jetzt die eigentliche Datei schreiben
+            output_file = open(datei, 'w')
+            output_file.write(new_data_str)
+            output_file.close()
                     
     def closeEvent(self, event):
+        """Wird beim Klick auf das Fensterschließkreuz aufgerufen."""
         reply = QtWidgets.QMessageBox.question(self, 'Wirklich beenden?',
             "Wirklich beenden?", QtWidgets.QMessageBox.Yes | 
             QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
 
-        if reply == QtWidgets.QMessageBox.Yes:
+        if reply == QtWidgets.QMessageBox.Yes: #Es wurde ja geklickt
             try:
                 self.stop()
                 self.sensor.close()
                 del self.sensor
             except:
-                pass
-            event.accept()
+                pass #Hilft jetzt auch nix mehr sich zu sträuben
+            event.accept() #Jetzt wird das Fenster tatsächlich geschlossen
         else:
-            event.ignore()
+            event.ignore() #Ansonsten wird nix gemacht
 
-if __name__ == '__main__':
-    from PyQt5.QtGui import QApplication 
-    if not QApplication.instance():
+if __name__ == '__main__': #Falls das die ausgeführte Datei ist, wird der folgende Teil ausgeführt
+    from PyQt5.QtGui import QApplication# Import der Application
+    if not QApplication.instance(): #wenn es noch keine App gibt, wird eine generiert
         app = QApplication(sys.argv)
-    else:
-        app = QApplication.instance() 
-    window = MyWindow()
-    window.show()
-    sys.exit(app.exec_())
+    else: #Ansonsten wird die aktuelle schon vorhandene verwendet
+        app = QApplication.instance()
+    window = MyWindow() #Fenster erzeugen
+    window.show() # und anzeigen
+    sys.exit(app.exec_()) # und App ausführen
