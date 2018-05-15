@@ -125,5 +125,15 @@ class Feinstaub():
         del self.sensor
 
 if __name__ == '__main__': #Falls das die ausgeführte Datei ist, wird der folgende Teil ausgeführt
+    if "fs" in dir(): #Wenn es schon eine Instanz gibt, erst mal deren Verbindung kappen
+        fs.close()
     fs = Feinstaub("COM5") #Instanz erzeugen
+    fs.start()
+    #zum Beenden:
+#    fs.stop()
+    # um den seriellen Port wieder freizugeben:
+#    fs.close()
+    
+
+    
 
